@@ -10,15 +10,16 @@ import CoreData
 
 struct AddExpenseView: View {
     @ObservedObject var viewModel: ExpenseViewModel
+    @Environment(\.dismiss) private var dismiss
     
     @State private var title: String = ""
     @State private var amountText: String = ""
     @State private var date: Date = Date()
     @State private var category: String = ""
-    @State private var paymentType: String = "Gotówka"
+    @State private var paymentType: String = "Cash"
     
-    let categories = ["General", "Food", "Gas", "Subscriptions", "Fun", "Other"]
-    let paymentTypes = ["Cash", "Card", "BLIK"]
+    private let categories = ["General", "Food", "Gas", "Subscriptions", "Fun", "Other"]
+    private let paymentTypes = ["Cash", "Card", "BLIK"]
     
     
     var body: some View {
@@ -46,9 +47,42 @@ struct AddExpenseView: View {
                     }.pickerStyle(.segmented)
                 }
             }
+            .navigationTitle("Add Expense")
+        }.toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") {
+                    saveExpense()
+                }
+            }
         }
     }
+    
+    private func saveExpense() {
+        // 1. sprawdź kwotę
+        guard let amount = Double(amountText.replacingOccurrences(of: ",", with: ".")),
+              amount > 0 else {
+            print("Nieprawidłowa kwota")
+            return
+        }
+        
+        // 2. może jakaś domyślna kategoria
+        let finalCategory = category.isEmpty ? "Other" : category
+        
+        // 3. wywołanie viewModelu
+        viewModel.addExpense(
+            title: title.isEmpty ? "No title" : title,
+            amount: amount,
+            date: date,
+            category: finalCategory,
+            paymentType: paymentType
+        )
+        
+        // 4. zamknięcie widoku
+        dismiss()
+    }
 }
+
+
 
 class ExpenseViewModelMock: ExpenseViewModel {
     init() {
