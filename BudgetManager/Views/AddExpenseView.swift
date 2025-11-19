@@ -33,7 +33,7 @@ struct AddExpenseView: View {
                     DatePicker("Date", selection: $date, displayedComponents: .date)
                 }
                 Section("Category") {
-                    Picker("General", selection: $category) {
+                    Picker("Category", selection: $category) {
                         ForEach(categories, id: \.self) {cat in
                             Text(cat).tag(cat)
                         }
